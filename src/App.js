@@ -4,7 +4,11 @@ import "firebase/auth";
 import firebaseConfig from './firebase.config';
 import { useState } from 'react';
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}else {
+  firebase.app(); // if already initialized, use that one
+}
 
 function App() {
   const [newUser, setNewUser] = useState(false);
@@ -45,17 +49,21 @@ function App() {
     firebase.auth().signInWithPopup(fbProvider)
     .then(res => {
       console.log('Facebook User', res)
+      const {displayName, email, photoURL} = res.user;
+      const signedInUser = {
+        isSignedIn: true,
+        name: displayName,
+        email: email,
+        photo: photoURL
+      }
+      setUser(signedInUser)
     })
     .catch((error) => {
-      // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
-      // The email of the user's account used.
       var email = error.email;
-      // The firebase.auth.AuthCredential type that was used.
       var credential = error.credential;
-
-      // ...
+      console.log(errorCode, errorMessage, email, credential)
     });
   }
 
